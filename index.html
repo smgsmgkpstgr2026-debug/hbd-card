@@ -1,807 +1,296 @@
-<!DOCTYPE html>
-<html lang="en">
+A<!DOCTYPE html>
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-  <title>Aplikasi Inventory & Peminjaman + Filter + Cetak + Cetak Barcode + Hapus Duplikat + Notifikasi</title>
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- QRCode.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <!-- SheetJS (XLSX) -->
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-  <!-- PapaParse (CSV) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <!-- Firebase SDK (compat) -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <!-- Firebase Authentication -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <style>
-    /* CSS TIDAK BERUBAH */
-    body { background-color: #f8f9fa; }
-    .navbar { background-color: #0d6efd; }
-    .navbar-brand, .nav-link { color: white !important; }
-    .card { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .item-image { max-width: 100%; max-height: 200px; object-fit: contain; display: block; margin: 0 auto; }
-    #hiddenFileInput { display: none; }
-    .qr-code { width: 100px; height: 100px; cursor: pointer; margin: 0 auto; }
-    .forgot-password-link { cursor: pointer; color: #0d6efd; text-decoration: underline; }
-    .forgot-password-link:hover { color: #0a58ca; }
-    .delete-selected-btn { margin-right: 10px; }
-    .toast-notif {
-      position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 12px 20px;
-      border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 9999; font-size: 14px;
-      font-weight: bold; transition: opacity 0.3s ease; opacity: 1;
-    }
-    .toast-notif.error { background: #dc3545; }
-    .toast-notif.warning { background: #ffc107; color: #000; }
-    @media print {
-      .no-print, .navbar, .btn, .delete-selected-btn, .action-buttons, .filter-sort-bar, .print-hide, .toast-notif { display: none !important; }
-      .table { width: 100%; border-collapse: collapse; }
-      .table th, .table td { border: 1px solid #ddd; padding: 5px; }
-      .qr-code { display: none; }
-      body { background: white; margin: 0; padding: 0; }
-      .container { width: 100%; max-width: none; padding: 0; margin: 0; }
-    }
-    .barcode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px; }
-    .barcode-item { text-align: center; border: 1px solid #ccc; padding: 10px; border-radius: 8px; page-break-inside: avoid; }
-    .barcode-item .qr-container { width: 150px; height: 150px; margin: 0 auto; }
-    .barcode-item .item-name { font-weight: bold; margin-top: 10px; font-size: 14px; word-break: break-word; }
-    @media print {
-      .barcode-grid { grid-template-columns: repeat(3, 1fr); }
-      .barcode-item { border: none; page-break-inside: avoid; }
-      .no-print-barcode { display: none; }
-    }
-    .image-preview-container { margin-top: 10px; text-align: center; }
-    .image-preview { max-width: 100%; max-height: 200px; object-fit: contain; border: 1px solid #ddd; border-radius: 8px; padding: 5px; background: #f8f9fa; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ucapan Ulang Tahun - Elegan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --deep-blue: #0f2027;
+            --mid-blue: #203a43;
+            --silver: #c0c0c0;
+            --gold-accent: #ffd700;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Montserrat', sans-serif;
+            background: #000000; /* Warna hitam polos untuk latar belakang PC/Laptop */
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .card-frame {
+            /* --- MEMBUAT FULL SCREEN DI HP --- */
+            width: 100%;
+            max-width: 500px; /* Membatasi lebar maksimal agar tidak terlalu melar jika dibuka di PC */
+            height: 100vh; /* Fallback untuk browser lama */
+            height: 100dvh; /* Memenuhi layar tinggi penuh termasuk area navigasi HP */
+            border: none; /* Menghilangkan border luar */
+            border-radius: 0; /* Menghilangkan lengkungan sudut agar rata dengan layar HP */
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box; /* Memastikan padding tidak menambah ukuran frame */
+            text-align: center;
+            
+            /* --- PENGATURAN BACKGROUND IMAGE --- */
+            background-image: url('bg-kartu.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: var(--mid-blue);
+        }
+
+        /* Overlay gelap transparan agar teks selalu terbaca di atas background apa pun */
+        .card-frame::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4); /* Efek gelap 40% */
+            border-radius: 0; /* Menyesuaikan frame */
+            z-index: 0;
+        }
+
+        /* Border perak di dalam kartu (ornamen) */
+        .card-frame::before {
+            content: '';
+            position: absolute;
+            top: 20px; left: 20px; right: 20px; bottom: 20px; /* Jarak border dari tepi layar */
+            border: 1.5px solid rgba(192, 192, 192, 0.6); /* Warna silver dengan sedikit transparansi */
+            border-radius: 15px; /* Lengkungan khusus untuk border dalam */
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Pastikan konten berada di atas overlay background */
+        .slide, .progress-dots {
+            z-index: 2; 
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 1s ease;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--silver);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        h2 {
+            font-weight: 400;
+            letter-spacing: 2px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .photo-frame {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            border: 3px solid var(--gold-accent);
+            margin: 20px auto 10px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .age-text {
+            font-size: 1.5rem; 
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-accent);
+            margin-bottom: 10px;
+            padding: 0 10px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        .verse-container {
+            font-style: italic;
+            line-height: 1.8;
+            font-size: 1rem;
+            padding: 0 20px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .verse-ref {
+            display: block;
+            margin-top: 15px;
+            color: var(--gold-accent);
+            font-weight: bold;
+        }
+
+        .btn {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--silver);
+            color: var(--silver);
+            padding: 10px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.3s;
+            margin-top: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn:hover {
+            background: var(--silver);
+            color: var(--deep-blue);
+        }
+
+        .btn-primary {
+            background: var(--gold-accent);
+            border-color: var(--gold-accent);
+            color: var(--deep-blue);
+            font-weight: bold;
+        }
+        
+        .progress-dots {
+            position: absolute;
+            bottom: 40px; /* Dinaikkan sedikit agar tidak tertutup tombol navigasi HP */
+            display: flex;
+            gap: 10px;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+        }
+        .dot.active {
+            background: var(--silver);
+            box-shadow: 0 0 5px white;
+        }
+        
+    </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg">
-    <div class="container">
-      <a class="navbar-brand" href="#"><i class="fas fa-boxes me-2"></i>Inv&Pinjam Sync</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto" id="navLinks"></ul>
-        <span class="navbar-text text-white me-3" id="userDisplay"></span>
-        <button class="btn btn-light btn-sm" onclick="logout()">Logout</button>
-      </div>
-    </div>
-  </nav>
 
-  <!-- ===== TAMBAHAN: Informasi Sekolah Minggu GKPS Tangerang ===== -->
-  <div class="container-fluid bg-light py-2 border-bottom border-primary border-2">
-    <div class="container text-center">
-      <h5 class="mb-0 text-primary fw-bold">
-        <i class="fas fa-church me-2"></i>Sekolah Minggu GKPS Tangerang
-      </h5>
-    </div>
-  </div>
-  <!-- ===== AKHIR TAMBAHAN ===== -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="happy_birthday.mp3" type="audio/mpeg">
+        <source src="https://upload.wikimedia.org/wikipedia/commons/transcoded/6/61/Happy_Birthday_to_You_-_instrumental.ogg/Happy_Birthday_to_You_-_instrumental.ogg.mp3" type="audio/mpeg">
+    </audio>
 
-  <div class="container mt-4" id="app">
-    <div id="pageContent"></div>
-  </div>
-
-  <!-- Modals (tidak berubah) -->
-  <div class="modal fade" id="itemDetailModal" tabindex="-1">
-    <div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Detail Barang</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body" id="itemDetailBody">...</div></div></div>
-  </div>
-
-  <div class="modal fade" id="itemFormModal" tabindex="-1">
-    <div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title" id="itemFormTitle">Tambah Barang</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-    <div class="modal-body">
-      <input type="hidden" id="editItemId">
-      <div class="row">
-        <div class="col-md-6 mb-3"><label class="form-label">Nama Barang *</label><input type="text" class="form-control" id="itemName" required></div>
-        <div class="col-md-6 mb-3"><label class="form-label">Kategori</label><input type="text" class="form-control" id="itemCategory"></div>
-        <div class="col-md-3 mb-3"><label class="form-label">Jumlah (Stok)</label><input type="number" class="form-control" id="itemQuantity" value="0"></div>
-        <div class="col-md-3 mb-3"><label class="form-label">Lokasi</label><input type="text" class="form-control" id="itemLocation"></div>
-        <div class="col-md-3 mb-3"><label class="form-label">Type (Merk/Model)</label><input type="text" class="form-control" id="itemType"></div>
-        <div class="col-md-3 mb-3"><label class="form-label">Lama (jumlah lama)</label><input type="text" class="form-control" id="itemLama"></div>
-        <div class="col-md-3 mb-3"><label class="form-label">Baru (jumlah baru)</label><input type="text" class="form-control" id="itemBaru"></div>
-        <div class="col-md-3 mb-3"><label class="form-label">Status</label><select class="form-select" id="itemStatus"><option value="Baik">Baik</option><option value="Rusak">Rusak</option><option value="Perbaikan">Perbaikan</option></select></div>
-        <div class="col-md-6 mb-3"><label class="form-label">Catatan</label><textarea class="form-control" id="itemNotes" rows="2"></textarea></div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">URL Gambar</label>
-          <div class="input-group"><input type="text" class="form-control" id="itemImageUrl" oninput="updateImagePreview()"><button class="btn btn-outline-secondary" type="button" onclick="triggerFileUploadForItem()"><i class="fas fa-upload"></i> Upload</button></div>
-          <div class="image-preview-container mt-2"><img id="imagePreview" class="image-preview" src="" alt="Preview" style="display: none;"></div>
+    <div class="card-frame">
+        
+        <div class="slide active" id="slide-1">
+            <h1 style="font-size: 2rem;">Kartu Ucapan</h1>
+            <p>Spesial untuk:</p>
+            <h2 id="name-display-1" style="color: var(--gold-accent); font-size: 1.5rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">[Nama]</h2>
+            <button class="btn btn-primary" onclick="startExperience()">Buka Kartu</button>
         </div>
-      </div>
+
+        <div class="slide" id="slide-2">
+            <h1>Selamat Ulang Tahun</h1>
+            
+            <div class="photo-frame">
+                <img src="profil.jpg" alt="Profil">
+            </div>
+
+            <div class="age-text" id="age-display">XX</div>
+            
+            <p style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Tahun Berkat & Penyertaan Tuhan</p>
+            <button class="btn" onclick="nextSlide(3)">Lihat Ayat >> </button>
+        </div>
+
+        <div class="slide" id="slide-3">
+            <div class="verse-container">
+                "Ajarlah kami menghitung hari-hari kami sedemikian, hingga kami beroleh hati yang bijaksana."
+                <span class="verse-ref">Mazmur 90:12</span>
+            </div>
+            <button class="btn" onclick="nextSlide(4)">Lanjut >> </button>
+        </div>
+
+        <div class="slide" id="slide-4">
+            <p style="text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Tuhan Yesus Memberkati senantiasa dengan kesehatan dan sukacita.</p>
+            <br>
+            <hr style="width: 50%; opacity: 0.5; border-color: var(--silver);">
+            <br>
+            <p style="font-size: 0.9rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">Salam Kasih,</p>
+            <h3 id="sender-display" style="color: var(--gold-accent); text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">[Pengirim]</h3>
+            <button class="btn" onclick="nextSlide(1)">Ulangi</button>
+        </div>
+
+        <div class="progress-dots">
+            <div class="dot active" id="dot-1"></div>
+            <div class="dot" id="dot-2"></div>
+            <div class="dot" id="dot-3"></div>
+            <div class="dot" id="dot-4"></div>
+        </div>
     </div>
-    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="button" class="btn btn-primary" onclick="saveItemFromModal()">Simpan Barang</button></div></div></div>
-  </div>
 
-  <div class="modal fade" id="userModal" tabindex="-1">
-    <div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="userModalTitle">Tambah User</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-    <div class="modal-body"><input type="hidden" id="editUserId"><div class="mb-3"><label>Nama Lengkap</label><input type="text" class="form-control" id="userName" required></div><div class="mb-3"><label>Email</label><input type="email" class="form-control" id="userEmail" required></div><div class="mb-3"><label>Password</label><input type="password" class="form-control" id="userPassword" placeholder="Minimal 4 karakter"></div><div class="mb-3"><label>Role</label><select class="form-select" id="userRole"><option value="borrower">Peminjam</option><option value="editor">Editor</option><option value="admin">Admin</option></select></div></div>
-    <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="button" class="btn btn-primary" onclick="saveUser()">Simpan</button></div></div></div>
-  </div>
-
-  <div class="modal fade" id="forgotPasswordModal" tabindex="-1">
-    <div class="modal-dialog"><div class="modal-content"><div class="modal-header"><h5 class="modal-title"><i class="fas fa-key me-2"></i>Lupa Password</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="alert alert-info">Masukkan email Anda, kami akan mengirimkan tautan untuk mereset password.</div><div class="mb-3"><label>Email</label><input type="email" class="form-control" id="forgotEmail"></div><div id="forgotPasswordMessage" class="alert d-none"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button><button type="button" class="btn btn-primary" onclick="processForgotPassword()">Kirim</button></div></div></div>
-  </div>
-
-  <input type="file" id="hiddenFileInput" accept="image/*">
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // ==================== KONFIGURASI FIREBASE ====================
-    const firebaseConfig = {
-      apiKey: "AIzaSyDPoc1v-_vZKKc36l5YuMGrXmVU-ooV6Jo",
-      authDomain: "inventory-smgksptgr.firebaseapp.com",
-      databaseURL: "https://inventory-smgksptgr-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "inventory-smgksptgr",
-      storageBucket: "inventory-smgksptgr.firebasestorage.app",
-      messagingSenderId: "1065690096985",
-      appId: "1:1065690096985:web:6687d879ae8d8355e31848",
-      measurementId: "G-LXNEGY6VQL"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-
-    // ==================== GLOBAL VARIABLES ====================
-    let items = [], requests = [], users = [];
-    let itemsListener = null, requestsListener = null, usersListener = null;
-    let currentPage = 'login', itemFormModalObj = null, userModalInstance = null, forgotPasswordModal = null;
-    let isItemsLoading = true, isUsersLoading = true;
-    let filterName = '', sortOrder = 'asc';
-    const STORAGE_KEYS = { CURRENT_USER: 'current_user' };
-    let qrGeneratedForItems = new Set();
-
-    // ==================== FIRESTORE LISTENERS ====================
-    function startItemsListener(cb) {
-      if (itemsListener) itemsListener();
-      isItemsLoading = true;
-      itemsListener = db.collection('items').onSnapshot(snap => {
-        items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        isItemsLoading = false;
-        qrGeneratedForItems.clear();
-        if (cb) cb(items);
-        if (currentPage === 'inventory') {
-          if (document.getElementById('inventoryTableBody')) {
-            updateInventoryTableBody();
-          } else {
-            renderPage();
-          }
-        } else if (['borrowForm','myBorrows','borrowRequests','activeLoans','history','manageUsers'].includes(currentPage)) {
-          renderPage();
-        }
-      }, err => { console.error(err); showToast('Gagal sync inventory', 'error'); isItemsLoading = false; });
-    }
-
-    function startRequestsListener(cb) {
-      if (requestsListener) requestsListener();
-      requestsListener = db.collection('borrow_requests').onSnapshot(snap => {
-        requests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        if (cb) cb(requests);
-        if (['myBorrows','borrowRequests','activeLoans','history'].includes(currentPage)) renderPage();
-      }, err => { console.error(err); showToast('Gagal sync peminjaman', 'error'); });
-    }
-
-    function startUsersListener(cb) {
-      if (usersListener) usersListener();
-      isUsersLoading = true;
-      usersListener = db.collection('users').onSnapshot(async snap => {
-        users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        isUsersLoading = false;
-        if (users.length === 0) await createDefaultUsers();
-        if (cb) cb(users);
-        if (currentPage === 'manageUsers') renderPage();
-      }, err => { console.error(err); showToast('Gagal sync user', 'error'); isUsersLoading = false; });
-    }
-
-    async function createDefaultUsers() {
-      try {
-        const batch = db.batch();
-        batch.set(db.collection('users').doc(), { name:'Admin', email:'admin@inv.com', password:'admin', role:'admin', createdAt:firebase.firestore.FieldValue.serverTimestamp() });
-        batch.set(db.collection('users').doc(), { name:'Editor', email:'editor@inv.com', password:'editor', role:'editor', createdAt:firebase.firestore.FieldValue.serverTimestamp() });
-        batch.set(db.collection('users').doc(), { name:'Borrower', email:'user@inv.com', password:'user', role:'borrower', createdAt:firebase.firestore.FieldValue.serverTimestamp() });
-        await batch.commit();
-      } catch(e) { console.error(e); }
-    }
-
-    // ==================== CRUD ====================
-    async function addItem(data) { try { await db.collection('items').add(data); return true; } catch(e) { showToast(e.message,'error'); return false; } }
-    async function updateItem(id, data) { try { await db.collection('items').doc(id).update(data); return true; } catch(e) { showToast(e.message,'error'); return false; } }
-    async function deleteItem(id) { try { await db.collection('items').doc(id).delete(); return true; } catch(e) { showToast(e.message,'error'); return false; } }
-    function getAllUsers() { return users; }
-    function getUserById(id) { return users.find(u => u.id === id); }
-    async function addUser(user) { try { await db.collection('users').add({...user, createdAt:firebase.firestore.FieldValue.serverTimestamp()}); return true; } catch(e) { showToast(e.message,'error'); return false; } }
-    async function updateUserById(id, data) { try { const { createdAt, ...up } = data; await db.collection('users').doc(id).update(up); return true; } catch(e) { showToast(e.message,'error'); return false; } }
-    async function deleteUserById(id) { if (getCurrentUser()?.id === id) { showToast('Tidak bisa hapus sendiri','warning'); return false; } try { await db.collection('users').doc(id).delete(); return true; } catch(e) { showToast(e.message,'error'); return false; } }
-
-    // ==================== SESSION ====================
-    function getCurrentUser() { return JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER)); }
-    function setCurrentUser(u) { localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(u)); }
-
-    // ==================== TOAST ====================
-    function showToast(msg, type='success') {
-      const t = document.createElement('div'); t.className = `toast-notif ${type}`;
-      t.innerHTML = `<i class="fas ${type==='success'?'fa-check-circle':(type==='error'?'fa-exclamation-circle':'fa-info-circle')} me-2"></i>${msg}`;
-      document.body.appendChild(t); setTimeout(() => { t.style.opacity='0'; setTimeout(() => t.remove(),500); },4000);
-    }
-
-    // ==================== LUPA PASSWORD ====================
-    function showForgotPasswordModal() { 
-      document.getElementById('forgotEmail').value=''; 
-      document.getElementById('forgotPasswordMessage').classList.add('d-none'); 
-      if(!forgotPasswordModal) forgotPasswordModal = new bootstrap.Modal(document.getElementById('forgotPasswordModal')); 
-      forgotPasswordModal.show(); 
-    }
-    async function processForgotPassword() {
-      const email = document.getElementById('forgotEmail').value.trim(), msg = document.getElementById('forgotPasswordMessage');
-      if(!email) { msg.classList.remove('d-none'); msg.classList.add('alert-danger'); msg.innerHTML='Email harus diisi'; return; }
-      msg.classList.remove('d-none'); msg.classList.add('alert-info'); msg.innerHTML='Mengirim email...';
-      try {
-        await auth.sendPasswordResetEmail(email);
-        msg.classList.remove('alert-info','alert-danger'); msg.classList.add('alert-success');
-        msg.innerHTML = '✅ Email reset password telah dikirim. Cek inbox/spam.';
-        setTimeout(() => { forgotPasswordModal?.hide(); msg.classList.add('d-none'); },5000);
-      } catch(e) {
-        msg.classList.remove('alert-info'); msg.classList.add('alert-danger');
-        if(e.code==='auth/user-not-found') msg.innerHTML = '❌ Email tidak terdaftar.';
-        else if(e.code==='auth/invalid-email') msg.innerHTML = '❌ Format email salah.';
-        else msg.innerHTML = '❌ Gagal mengirim email.';
-      }
-    }
-
-    // ==================== UPLOAD & PREVIEW ====================
-    function uploadImage(file) { return new Promise((res,rej)=>{ const r = new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(file); }); }
-    async function triggerFileUploadForItem() {
-      const inp = document.getElementById('hiddenFileInput');
-      inp.onchange = async e => {
-        const f = e.target.files[0]; if(f) { try { document.getElementById('itemImageUrl').value = await uploadImage(f); updateImagePreview(); showToast('Gambar siap','success'); } catch(err) { showToast('Gagal upload','error'); } }
-        inp.value = '';
-      };
-      inp.click();
-    }
-    function updateImagePreview() {
-      const url = document.getElementById('itemImageUrl').value.trim(), preview = document.getElementById('imagePreview');
-      if(url) { preview.src = url; preview.style.display = 'block'; preview.onerror = () => { preview.style.display = 'none'; }; }
-      else { preview.style.display = 'none'; preview.src = ''; }
-    }
-
-    // ==================== MODAL ITEM ====================
-    function showAddItemModal() { resetItemForm(); document.getElementById('editItemId').value=''; document.getElementById('itemFormTitle').innerText='Tambah Barang'; if(!itemFormModalObj) itemFormModalObj = new bootstrap.Modal(document.getElementById('itemFormModal')); itemFormModalObj.show(); }
-    function editItem(id) { const it = items.find(i=>i.id===id); if(!it) return; resetItemForm(); 
-      document.getElementById('editItemId').value = it.id; document.getElementById('itemName').value = it.name||'';
-      document.getElementById('itemCategory').value = it.category||''; document.getElementById('itemQuantity').value = it.quantity||0;
-      document.getElementById('itemLocation').value = it.location||''; document.getElementById('itemType').value = it.type||'';
-      document.getElementById('itemLama').value = it.lama||''; document.getElementById('itemBaru').value = it.baru||'';
-      document.getElementById('itemStatus').value = it.status||'Baik'; document.getElementById('itemNotes').value = it.notes||'';
-      document.getElementById('itemImageUrl').value = it.image||''; updateImagePreview();
-      document.getElementById('itemFormTitle').innerText = 'Edit Barang'; if(!itemFormModalObj) itemFormModalObj = new bootstrap.Modal(document.getElementById('itemFormModal')); itemFormModalObj.show(); 
-    }
-    function resetItemForm() { 
-      document.getElementById('itemName').value=''; document.getElementById('itemCategory').value=''; document.getElementById('itemQuantity').value='0';
-      document.getElementById('itemLocation').value=''; document.getElementById('itemType').value=''; document.getElementById('itemLama').value='';
-      document.getElementById('itemBaru').value=''; document.getElementById('itemStatus').value='Baik'; document.getElementById('itemNotes').value='';
-      document.getElementById('itemImageUrl').value=''; updateImagePreview();
-    }
-    async function saveItemFromModal() {
-      const id = document.getElementById('editItemId').value, name = document.getElementById('itemName').value.trim();
-      if(!name) { showToast('Nama wajib','warning'); return; }
-      const data = { name, category: document.getElementById('itemCategory').value.trim(), quantity: parseInt(document.getElementById('itemQuantity').value)||0,
-        location: document.getElementById('itemLocation').value.trim(), type: document.getElementById('itemType').value.trim(),
-        lama: document.getElementById('itemLama').value.trim(), baru: document.getElementById('itemBaru').value.trim(),
-        status: document.getElementById('itemStatus').value, notes: document.getElementById('itemNotes').value.trim(),
-        image: document.getElementById('itemImageUrl').value.trim(), updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
-      if(!id) { data.createdAt = firebase.firestore.FieldValue.serverTimestamp(); await addItem(data); showToast('Tambah berhasil','success'); }
-      else { await updateItem(id, data); showToast('Update berhasil','success'); }
-      itemFormModalObj.hide();
-    }
-
-    // ==================== IMPORT EXCEL ====================
-    function showImportModal() {
-      const inp = document.createElement('input'); inp.type='file'; inp.accept='.xlsx,.xls,.csv,.txt';
-      inp.onchange = async e => {
-        const f = e.target.files[0]; if(!f) return; const ext = f.name.split('.').pop().toLowerCase();
-        const reader = new FileReader(); showToast('Memproses file...','info');
-        reader.onload = async ev => {
-          try {
-            let rows = [];
-            if(ext==='csv'||ext==='txt') {
-              const result = Papa.parse(ev.target.result, { header:false, skipEmptyLines:true });
-              const dataArray = result.data; const hIdx = findHeaderRow(dataArray);
-              if(hIdx===-1) { showToast('Header tidak ditemukan','error'); return; }
-              const headers = dataArray[hIdx], dataRows = dataArray.slice(hIdx+1);
-              rows = dataRows.map(r => { const o={}; headers.forEach((h,i)=> o[h]=r[i]||''); return o; });
-            } else {
-              const data = new Uint8Array(ev.target.result), wb = XLSX.read(data, {type:'array'});
-              const sheet = wb.Sheets[wb.SheetNames[0]], raw = XLSX.utils.sheet_to_json(sheet, {header:1,defval:""});
-              if(!raw||!raw.length) { showToast('File kosong','error'); return; }
-              const hIdx = findHeaderRow(raw); if(hIdx===-1) { showToast('Header tidak ditemukan','error'); return; }
-              const headers = raw[hIdx], dataRows = raw.slice(hIdx+1);
-              rows = dataRows.map(r => { const o={}; headers.forEach((h,i)=> o[h]=r[i]||''); return o; });
-            }
-            const res = await importDataWithDuplicateCheck(rows);
-            showToast(`Import: ✅${res.success} berhasil, ⏭️${res.skipped} duplikat, ❌${res.failed} gagal`, res.failed>0?'warning':'success');
-          } catch(err) { showToast('Error: '+err.message,'error'); }
+    <script>
+        const config = {
+            nama: "Csy Thomas Deardo Simarmata",
+            umur: "Hari ini aku bersyukur untuk satu tahun kehidupan lagi", 
+            pengirim: "St. Robert Manihuruk"
         };
-        if(ext==='csv'||ext==='txt') reader.readAsText(f,'UTF-8'); else reader.readAsArrayBuffer(f);
-      };
-      inp.click();
-    }
-    function findHeaderRow(arr) {
-      for(let i=0; i<Math.min(arr.length,20); i++) { const row=arr[i]; if(!row||!Array.isArray(row)) continue;
-        const str = row.join(' ').toLowerCase(); if(str.includes('nama')||str.includes('type')||str.includes('qty')||str.includes('status')) if(row.length>=2) return i; }
-      return -1;
-    }
-    async function importDataWithDuplicateCheck(rows) {
-      let lastName='', succ=0, skip=0, fail=0;
-      for(const row of rows) {
-        let name=''; for(let k of ['NAMA','Nama','nama','NAMA BARANG','Nama Barang','ITEM','Item','item']) if(row[k]&&row[k].toString().trim()) { name=row[k].toString().trim(); break; }
-        if(!name) { if(lastName) name=lastName; else continue; } else lastName=name;
-        let type='', lama='', baru='', status='Baik', catatan='', category='Umum', location='Gudang';
-        for(let k of ['TYPE','Type','type','MERK','Merk']) if(row[k]) { type=row[k].toString().trim(); break; }
-        for(let k of ['Lama','lama','LAMA']) if(row[k]) { lama=row[k].toString().trim(); break; }
-        for(let k of ['Baru','baru','BARU']) if(row[k]) { baru=row[k].toString().trim(); break; }
-        let qty=0; for(let k of ['Qty','QTY','quantity','Jumlah','STOK','Stok','stok','qty']) if(row[k]!==undefined) { let v=row[k]; if(typeof v==='string') { let m=v.match(/\d+/); qty=m?parseInt(m[0]):0; } else qty=parseInt(v)||0; break; }
-        for(let k of ['STATUS','Status','status']) if(row[k]&&row[k].toString().trim()) { status=row[k].toString().trim(); break; }
-        for(let k of ['CATATAN','Catatan','catatan','KETERANGAN']) if(row[k]) { catatan=row[k].toString().trim(); break; }
-        for(let k of ['KATEGORI','Kategori','kategori']) if(row[k]&&row[k].toString().trim()) { category=row[k].toString().trim(); break; }
-        for(let k of ['LOKASI','Lokasi','lokasi']) if(row[k]&&row[k].toString().trim()) { location=row[k].toString().trim(); break; }
-        const exist = items.find(i=> i.name.toLowerCase()===name.toLowerCase() && (i.type||'').toLowerCase()===type.toLowerCase());
-        if(exist) { skip++; continue; }
-        try { await db.collection('items').add({ name, category, quantity:qty, location, type, lama, baru, status, notes:catatan, image:'', createdAt:firebase.firestore.FieldValue.serverTimestamp() }); succ++; } catch(e) { fail++; }
-      }
-      return { success:succ, skipped:skip, failed:fail };
-    }
 
-    // ==================== HAPUS DUPLIKAT ====================
-    async function deleteDuplicates() {
-      if(!confirm('Hapus data duplikat? Hanya menyisakan satu.')) return;
-      const groups = new Map(); items.forEach(i=>{ const k=`${i.name.toLowerCase()}|${(i.type||'').toLowerCase()}`; if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(i.id); });
-      let toDel=[]; for(let ids of groups.values()) if(ids.length>1) toDel.push(...ids.slice(1));
-      if(!toDel.length) { showToast('Tidak ada duplikat','info'); return; }
-      if(!confirm(`Hapus ${toDel.length} item duplikat?`)) return;
-      let del=0; for(let id of toDel) if(await deleteItem(id)) del++;
-      showToast(`${del} item dihapus`,'success');
-    }
+        document.getElementById('name-display-1').innerText = config.nama;
+        document.getElementById('age-display').innerText = config.umur;
+        document.getElementById('sender-display').innerText = config.pengirim;
 
-    // ==================== ROUTING & RENDER ====================
-    function renderNav() {
-      const u = getCurrentUser(); const nav=document.getElementById('navLinks'), disp=document.getElementById('userDisplay');
-      if(u) { 
-        let roleText = '';
-        if(u.role==='admin') roleText='Admin';
-        else if(u.role==='editor') roleText='Editor';
-        else roleText='Peminjam';
-        disp.innerText = `Halo, ${u.name} (${roleText})`;
-        let links=''; 
-        if(u.role==='admin') {
-          links=`<li class="nav-item"><a class="nav-link" href="#" onclick="navigate('inventory')">Inventory</a></li>
-                 <li class="nav-item"><a class="nav-link" href="#" onclick="navigate('borrowRequests')">Permintaan</a></li>
-                 <li class="nav-item"><a class="nav-link" href="#" onclick="navigate('activeLoans')">Peminjaman Aktif</a></li>
-                 <li class="nav-item"><a class="nav-link" href="#" onclick="navigate('history')">Riwayat</a></li>
-                 <li class="nav-item"><a class="nav-link" href="#" onclick="navigate('manageUsers')"><i class="fas fa-users"></i> Kelola User</a></li>`;
-        } else if(u.role==='editor') {
-          links=`<li class="nav-item"><a class="nav-link" href="#" onclick="navigate('inventory')">Inventory</a></li>
-                 <li class="nav-item"><a class="nav-link" href="#" onclick="navigate('activeLoans')">Peminjaman Aktif</a></li>
-                 <li class="nav-item"><a class="nav-link" href="#" onclick="navigate('history')">Riwayat</a></li>`;
-        } else {
-          links=`<li class="nav-item"><a class="nav-link" href="#" onclick="navigate('inventory')">Lihat Barang</a></li>
-                 <li class="nav-item"><a class="nav-link" href="#" onclick="navigate('borrowForm')">Pinjam Barang</a></li>
-                 <li class="nav-item"><a class="nav-link" href="#" onclick="navigate('myBorrows')">Peminjamanku</a></li>`;
+        const music = document.getElementById('bg-music');
+
+        function startExperience() {
+            attemptPlayMusic();
+            nextSlide(2);
         }
-        nav.innerHTML = links; 
-      } else { disp.innerText=''; nav.innerHTML=''; }
-    }
 
-    function navigate(p) { 
-      const u = getCurrentUser();
-      if (p === 'manageUsers' && u?.role !== 'admin') {
-        showToast('Akses ditolak', 'error');
-        return;
-      }
-      if (p === 'borrowRequests' && u?.role !== 'admin') {
-        showToast('Akses ditolak', 'error');
-        return;
-      }
-      if (p === 'activeLoans' && !(u?.role === 'admin' || u?.role === 'editor')) {
-        showToast('Akses ditolak', 'error');
-        return;
-      }
-      if(p==='borrowForm' && !u) { showToast('Login dulu','warning'); currentPage='login'; } 
-      else currentPage=p; 
-      renderPage(); 
-    }
-
-    function renderPage() { 
-      const u=getCurrentUser(); 
-      if(!u && currentPage!=='login') currentPage='login'; 
-      const c=document.getElementById('pageContent');
-      if(currentPage==='login') c.innerHTML=renderLogin(); 
-      else if(currentPage==='inventory') c.innerHTML=renderInventory(); 
-      else if(currentPage==='borrowForm') c.innerHTML=renderBorrowForm(); 
-      else if(currentPage==='myBorrows') c.innerHTML=renderMyBorrows();
-      else if(currentPage==='borrowRequests') {
-        if(u?.role !== 'admin') c.innerHTML = '<div class="alert alert-danger">Akses ditolak</div>';
-        else c.innerHTML=renderBorrowRequests();
-      }
-      else if(currentPage==='activeLoans') {
-        if(!(u?.role === 'admin' || u?.role === 'editor')) c.innerHTML = '<div class="alert alert-danger">Akses ditolak</div>';
-        else c.innerHTML=renderActiveLoans();
-      }
-      else if(currentPage==='history') c.innerHTML=renderHistory();
-      else if(currentPage==='manageUsers') {
-        if(u?.role !== 'admin') c.innerHTML = '<div class="alert alert-danger">Akses ditolak</div>';
-        else c.innerHTML=renderManageUsers();
-      }
-      renderNav(); 
-    }
-
-    function renderLogin() { 
-      return `<div class="row justify-content-center"><div class="col-md-6"><div class="card"><div class="card-header bg-primary text-white">Login</div><div class="card-body"><div class="mb-3"><label>Email</label><input type="email" id="loginEmail" class="form-control" value="admin@inv.com"></div><div class="mb-3"><label>Password</label><input type="password" id="loginPassword" class="form-control" value="admin"></div><button class="btn btn-primary w-100" onclick="doLogin()">Login</button><hr><div class="text-center"><span class="forgot-password-link" onclick="showForgotPasswordModal()"><i class="fas fa-key"></i> Lupa Password?</span></div><hr><p class="text-muted text-center">Belum punya akun? Hubungi Pengurus GSM.</p><hr><p class="text-muted small text-center">Demo: admin@inv.com / admin | editor@inv.com / editor | user@inv.com / user</p></div></div></div></div>`; 
-    }
-
-    async function doLogin() { 
-      const email=document.getElementById('loginEmail').value.trim(), pass=document.getElementById('loginPassword').value; 
-      const u=users.find(x=>x.email===email&&x.password===pass); 
-      if(u){ 
-        setCurrentUser({id:u.id,name:u.name,email:u.email,role:u.role}); 
-        startItemsListener(); 
-        startRequestsListener(); 
-        navigate('inventory'); 
-      } else showToast('Email/password salah','error'); 
-    }
-
-    function logout() { 
-      localStorage.removeItem(STORAGE_KEYS.CURRENT_USER); 
-      if(itemsListener) itemsListener(); 
-      if(requestsListener) requestsListener(); 
-      navigate('login'); 
-      showToast('Logout berhasil','info'); 
-    }
-
-    // ==================== INVENTORY ====================
-    function getFilteredAndSortedItems() {
-      let filtered = items;
-      if (filterName.trim()) {
-        const keywords = filterName.trim().toLowerCase().split(/\s+/);
-        filtered = items.filter(item => {
-          const itemName = (item.name||'').toLowerCase();
-          return keywords.every(kw => itemName.includes(kw));
-        });
-      }
-      filtered.sort((a,b) => sortOrder==='asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
-      return filtered;
-    }
-
-    function updateInventoryTableBody() {
-      const tbody = document.getElementById('inventoryTableBody');
-      if (!tbody) return;
-      const user = getCurrentUser();
-      const filtered = getFilteredAndSortedItems();
-      let html = '';
-      filtered.forEach(it => {
-        html += `<tr>
-          <td class="text-center"><input type="checkbox" class="item-checkbox" value="${it.id}" onclick="updateDeleteButtonVisibility()"></td>
-          <td>${escapeHtml(it.name)}</td>
-          <td>${escapeHtml(it.type||'-')}</td>
-          <td>${escapeHtml(it.lama||'-')}</td>
-          <td>${escapeHtml(it.baru||'-')}</td>
-          <td>${it.quantity}</td>
-          <td>${escapeHtml(it.status||'Baik')}</td>
-          <td>${escapeHtml((it.notes||'').substring(0,30))}</td>
-          <td>${it.image ? `<img src="${it.image}" style="max-height:40px;max-width:60px;object-fit:contain;cursor:pointer;" onclick="showItemDetail('${it.id}')">` : '-'}</td>
-          <td><div class="qr-code" id="qr-${it.id}" onclick="showItemDetail('${it.id}')"></div></td>
-          ${user?.role==='admin' || user?.role==='editor' ? `<td><button class="btn btn-sm btn-warning" onclick="editItem('${it.id}')"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-danger" onclick="deleteItemConfirm('${it.id}')"><i class="fas fa-trash"></i></button></td>` : ''}
-        </tr>`;
-      });
-      tbody.innerHTML = html;
-      
-      setTimeout(() => {
-        filtered.forEach(it => {
-          const container = document.getElementById(`qr-${it.id}`);
-          if (container) {
-            container.innerHTML = '';
-            try {
-              new QRCode(container, {
-                text: window.location.origin + window.location.pathname + '?item=' + it.id,
-                width: 100,
-                height: 100
-              });
-              qrGeneratedForItems.add(it.id);
-            } catch (e) {
-              console.warn('QR generation failed for', it.id, e);
+        function attemptPlayMusic() {
+            music.volume = 1.0; 
+            music.muted = false;
+            var promise = music.play();
+            if (promise !== undefined) {
+                promise.then(_ => {}).catch(error => {
+                    console.log("Autoplay dicegah.");
+                });
             }
-          }
-        });
-        updateDeleteButtonVisibility();
-        const selectAll = document.getElementById('selectAllCheckbox');
-        if (selectAll) selectAll.checked = false;
-      }, 30);
-    }
+        }
 
-    function updateFilter() {
-      filterName = document.getElementById('filterNameInput')?.value || '';
-      updateInventoryTableBody();
-    }
-
-    function updateSortOrder(v) { sortOrder = v; updateInventoryTableBody(); }
-    function resetFilterSort() { 
-      filterName = ''; sortOrder = 'asc'; 
-      const filterInput = document.getElementById('filterNameInput');
-      if (filterInput) filterInput.value = '';
-      const sortSelect = document.getElementById('sortOrderSelect');
-      if (sortSelect) sortSelect.value = 'asc';
-      updateInventoryTableBody();
-    }
-
-    function renderInventory() {
-      const user = getCurrentUser(); 
-      if (isItemsLoading) return '<div class="text-center"><div class="spinner-border"></div> Memuat data...</div>';
-      qrGeneratedForItems.clear();
-      
-      let html = `<div class="d-flex justify-content-between align-items-center mb-3"><h3><i class="fas fa-boxes me-2"></i>Daftar Inventory</h3><div class="action-buttons">`;
-      if (user?.role === 'admin' || user?.role === 'editor') {
-        html += `<button class="btn btn-primary me-2" onclick="showAddItemModal()"><i class="fas fa-plus"></i> Tambah</button>
-                 <button class="btn btn-success me-2" onclick="showImportModal()"><i class="fas fa-file-import"></i> Import Excel</button>
-                 <button class="btn btn-info me-2" onclick="printInventory()"><i class="fas fa-print"></i> Cetak</button>
-                 <button class="btn btn-secondary me-2" onclick="printBarcode()"><i class="fas fa-qrcode"></i> Cetak Barcode</button>
-                 <button class="btn btn-warning me-2" onclick="deleteDuplicates()"><i class="fas fa-copy"></i> Hapus Duplikat</button>
-                 <button class="btn btn-danger delete-selected-btn" id="deleteSelectedBtn" onclick="deleteSelectedItems()" style="display:none;"><i class="fas fa-trash-alt"></i> Hapus Terpilih</button>`;
-      } else {
-        html += `<button class="btn btn-info me-2" onclick="printInventory()"><i class="fas fa-print"></i> Cetak</button>
-                 <button class="btn btn-secondary me-2" onclick="printBarcode()"><i class="fas fa-qrcode"></i> Cetak Barcode</button>`;
-      }
-      html += `</div></div>
-               <div class="row mb-3">
-                 <div class="col-md-4"><input type="text" class="form-control" id="filterNameInput" placeholder="Cari (pisah kata dengan spasi)" value="${escapeHtml(filterName)}" oninput="updateFilter()"></div>
-                 <div class="col-md-3">
-                   <select class="form-select" id="sortOrderSelect" onchange="updateSortOrder(this.value)">
-                     <option value="asc" ${sortOrder==='asc'?'selected':''}>A→Z</option>
-                     <option value="desc" ${sortOrder==='desc'?'selected':''}>Z→A</option>
-                   </select>
-                 </div>
-                 <div class="col-md-2"><button class="btn btn-secondary" onclick="resetFilterSort()">Reset</button></div>
-               </div>`;
-      
-      const filtered = getFilteredAndSortedItems();
-      if (filtered.length === 0) {
-        html += '<div class="alert alert-info">Tidak ada barang yang sesuai.</div>';
-      } else {
-        html += `<div class="table-responsive"><table class="table table-bordered table-hover"><thead><tr>
-                   <th width="40"><input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll()"></th>
-                   <th>Nama</th><th>Type</th><th>Lama</th><th>Baru</th><th>Stok</th><th>Status</th><th>Catatan</th><th>Gambar</th><th>QR</th>
-                   ${user?.role==='admin' || user?.role==='editor' ? '<th>Aksi</th>' : ''}
-                 </tr></thead>
-                 <tbody id="inventoryTableBody"></tbody></table></div>`;
-      }
-      
-      setTimeout(() => updateInventoryTableBody(), 20);
-      return html;
-    }
-
-    function printInventory() { 
-      let filtered = getFilteredAndSortedItems(); 
-      if(!filtered.length){ showToast('Tidak ada data','warning'); return; } 
-      let c='<html><head><title>Inventory</title><style>body{font-family:Arial;margin:20px} table{width:100%;border-collapse:collapse} th,td{border:1px solid #000;padding:8px}</style></head><body><h2>Daftar Inventory</h2><table><thead><tr><th>Nama</th><th>Type</th><th>Lama</th><th>Baru</th><th>Stok</th><th>Status</th><th>Catatan</th></tr></thead><tbody>'; 
-      filtered.forEach(i=>c+=`<tr><td>${escapeHtml(i.name)}</td><td>${escapeHtml(i.type||'-')}</td><td>${escapeHtml(i.lama||'-')}</td><td>${escapeHtml(i.baru||'-')}</td><td>${i.quantity}</td><td>${escapeHtml(i.status||'Baik')}</td><td>${escapeHtml(i.notes||'-')}</td></tr>`); 
-      c+='</tbody></table></body></html>'; const w=window.open('','_blank'); w.document.write(c); w.document.close(); w.print(); 
-    }
-    
-    function printBarcode() { 
-      const sel=document.querySelectorAll('.item-checkbox:checked'); 
-      let toPrint = sel.length ? items.filter(i=>Array.from(sel).some(cb=>cb.value===i.id)) : getFilteredAndSortedItems(); 
-      if(!toPrint.length){ showToast('Tidak ada item','warning'); return; } 
-      const w=window.open('','_blank'); 
-      w.document.write(`<!DOCTYPE html><html><head><title>Barcode</title><script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script><style>.barcode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:20px} .barcode-item{text-align:center;border:1px solid #ccc;padding:10px} .qr-container{width:150px;height:150px;margin:0 auto} @media print{.barcode-item{border:none}}</style></head><body><div style="text-align:center;margin-bottom:20px"><button onclick="window.print()">Cetak</button></div><div class="barcode-grid" id="grid"></div><script>const items=${JSON.stringify(toPrint.map(i=>({id:i.id,name:i.name})))}; const base=window.location.origin+window.location.pathname; items.forEach(i=>{const d=document.createElement('div');d.className='barcode-item';d.innerHTML='<div class="qr-container" id="qr-'+i.id+'"></div><div>'+i.name+'</div>';grid.appendChild(d);}); setTimeout(()=>{items.forEach(i=>{new QRCode(document.getElementById('qr-'+i.id),{text:base+'?item='+i.id,width:150,height:150})})},100);<\/script></body></html>`); 
-      w.document.close(); 
-    }
-    
-    function escapeHtml(s) { if(!s) return ''; return s.replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
-    function updateDeleteButtonVisibility() { const b=document.getElementById('deleteSelectedBtn'); if(b) b.style.display = document.querySelectorAll('.item-checkbox:checked').length ? 'inline-block':'none'; }
-    function toggleSelectAll() { const s=document.getElementById('selectAllCheckbox'); document.querySelectorAll('.item-checkbox').forEach(c=>c.checked=s.checked); updateDeleteButtonVisibility(); }
-    async function deleteItemConfirm(id) { if(confirm('Hapus?')) await deleteItem(id); }
-    async function deleteSelectedItems() { 
-      const cbs=document.querySelectorAll('.item-checkbox:checked'); 
-      if(!cbs.length){ showToast('Pilih item','warning'); return; } 
-      if(!confirm(`Hapus ${cbs.length} item?`)) return; 
-      let d=0; for(let cb of cbs) if(await deleteItem(cb.value)) d++; 
-      showToast(`${d} item dihapus`,'success'); 
-      document.getElementById('selectAllCheckbox').checked=false; 
-      updateDeleteButtonVisibility(); 
-    }
-
-    // ==================== PEMINJAMAN ====================
-    function renderBorrowForm() { 
-      const u=getCurrentUser(); 
-      if(!u) return '<div class="alert alert-warning">Login dulu</div>'; 
-      let opts='<option value="">Pilih Barang</option>'; 
-      items.forEach(i=>opts+=`<option value="${i.id}" data-max="${i.quantity}">${i.name} (stok ${i.quantity})</option>`); 
-      return `<div class="card"><div class="card-header bg-primary text-white">Form Peminjaman</div><div class="card-body"><div class="mb-3"><label>Nama Peminjam</label><input type="text" id="borrowerName" class="form-control" value="${u.name}" readonly></div><div class="mb-3"><label>Barang</label><select id="borrowItem" class="form-select">${opts}</select></div><div class="mb-3"><label>Jumlah</label><input type="number" id="borrowQty" class="form-control" min="1"></div><div class="mb-3"><label>Tanggal Pinjam</label><input type="date" id="borrowDate" class="form-control" value="${new Date().toISOString().slice(0,10)}"></div><div class="mb-3"><label>Rencana Kembali</label><input type="date" id="returnDate" class="form-control"></div><div class="mb-3"><label>Keperluan</label><textarea id="purpose" class="form-control" rows="2"></textarea></div><button class="btn btn-primary" onclick="submitBorrow()">Ajukan Peminjaman</button></div></div>`; 
-    }
-
-    async function submitBorrow() { 
-      const u=getCurrentUser(); if(!u) return; 
-      const itemId=document.getElementById('borrowItem').value; 
-      if(!itemId) return showToast('Pilih barang','warning'); 
-      const item=items.find(i=>i.id===itemId); 
-      const qty=parseInt(document.getElementById('borrowQty').value); 
-      if(qty<=0||qty>item.quantity) return showToast('Jumlah tidak valid','warning'); 
-      const bd=document.getElementById('borrowDate').value, rd=document.getElementById('returnDate').value; 
-      if(!bd||!rd) return showToast('Isi tanggal','warning'); 
-      const purpose=document.getElementById('purpose').value; 
-      await db.collection('borrow_requests').add({ 
-        itemId, itemName:item.name, borrowerId:u.id, borrowerName:u.name, quantity:qty, 
-        borrowDate:bd, returnDate:rd, purpose, status:'pending', 
-        createdAt:firebase.firestore.FieldValue.serverTimestamp() 
-      }); 
-      showToast('Permintaan diajukan','success'); navigate('myBorrows'); 
-    }
-
-    function renderMyBorrows() { 
-      const u=getCurrentUser(); 
-      const my=requests.filter(r=>r.borrowerId===u?.id); 
-      if(!my.length) return '<h3>Peminjamanku</h3><p>Belum ada.</p>'; 
-      let h='<h3>Peminjamanku</h3><table class="table"><thead><tr><th>Barang</th><th>Jumlah</th><th>Tgl Pinjam</th><th>Tgl Kembali</th><th>Status</th></tr></thead><tbody>'; 
-      my.forEach(r=>h+=`<tr><td>${r.itemName}</td><td>${r.quantity}</td><td>${r.borrowDate}</td><td>${r.returnDate}</td><td class="${r.status==='approved'?'text-success':r.status==='rejected'?'text-danger':r.status==='returned'?'text-info':'text-warning'}">${r.status}</td></tr>`); 
-      h+='</tbody></table>'; return h; 
-    }
-
-    function renderBorrowRequests() { 
-      const pending=requests.filter(r=>r.status==='pending'); 
-      if(!pending.length) return '<h3>Permintaan Pending</h3><p>Tidak ada.</p>'; 
-      let h='<h3>Permintaan Pending</h3><table class="table"><thead><tr><th>Peminjam</th><th>Barang</th><th>Jumlah</th><th>Aksi</th></tr></thead><tbody>'; 
-      pending.forEach(r=>h+=`<tr><td>${r.borrowerName}</td><td>${r.itemName}</td><td>${r.quantity}</td>
-        <td><button class="btn btn-sm btn-success" onclick="approveRequest('${r.id}')">Setujui</button> 
-        <button class="btn btn-sm btn-danger" onclick="rejectRequest('${r.id}')">Tolak</button></td></tr>`); 
-      h+='</tbody></table>'; return h; 
-    }
-
-    async function approveRequest(id) { 
-      const u=getCurrentUser(); 
-      if(u?.role !== 'admin') { showToast('Hanya admin yang dapat menyetujui','error'); return; }
-      const req=requests.find(r=>r.id===id); if(!req) return; 
-      const item=items.find(i=>i.id===req.itemId); 
-      if(item.quantity<req.quantity){ showToast('Stok tidak cukup','error'); return; } 
-      // Kurangi stok
-      await updateItem(item.id, {quantity: item.quantity - req.quantity});
-      await db.collection('borrow_requests').doc(id).update({status:'approved'}); 
-      showToast('Disetujui, stok berkurang','success'); 
-    }
-
-    async function rejectRequest(id) { 
-      const u=getCurrentUser(); 
-      if(u?.role !== 'admin') { showToast('Hanya admin yang dapat menolak','error'); return; }
-      await db.collection('borrow_requests').doc(id).update({status:'rejected'}); 
-      showToast('Ditolak','info'); 
-    }
-
-    // ==================== PENGEMBALIAN ====================
-    function renderActiveLoans() {
-      const active = requests.filter(r => r.status === 'approved');
-      if (!active.length) return '<h3>Peminjaman Aktif</h3><p>Tidak ada barang yang sedang dipinjam.</p>';
-      let html = '<h3>Peminjaman Aktif</h3><table class="table"><thead><tr><th>Peminjam</th><th>Barang</th><th>Jumlah</th><th>Tanggal Pinjam</th><th>Rencana Kembali</th><th>Aksi</th></tr></thead><tbody>';
-      active.forEach(r => {
-        html += `<tr>
-          <td>${escapeHtml(r.borrowerName)}</td>
-          <td>${escapeHtml(r.itemName)}</td>
-          <td>${r.quantity}</td>
-          <td>${r.borrowDate}</td>
-          <td>${r.returnDate}</td>
-          <td><button class="btn btn-sm btn-primary" onclick="returnItem('${r.id}')"><i class="fas fa-undo-alt"></i> Kembalikan</button></td>
-        </tr>`;
-      });
-      html += '</tbody></table>';
-      return html;
-    }
-
-    async function returnItem(requestId) {
-      const req = requests.find(r => r.id === requestId);
-      if (!req) return;
-      if (req.status !== 'approved') {
-        showToast('Peminjaman ini tidak dalam status aktif', 'error');
-        return;
-      }
-      if (!confirm(`Konfirmasi pengembalian ${req.itemName} (${req.quantity} pcs) oleh ${req.borrowerName}?`)) return;
-      
-      const item = items.find(i => i.id === req.itemId);
-      if (!item) {
-        showToast('Data barang tidak ditemukan', 'error');
-        return;
-      }
-      
-      // Kembalikan stok
-      const newQty = (item.quantity || 0) + req.quantity;
-      await updateItem(item.id, { quantity: newQty });
-      
-      // Update status request menjadi 'returned' dan tambahkan tanggal kembali aktual
-      await db.collection('borrow_requests').doc(requestId).update({
-        status: 'returned',
-        actualReturnDate: new Date().toISOString().split('T')[0]
-      });
-      
-      showToast('Barang berhasil dikembalikan, stok telah ditambah', 'success');
-      if (currentPage === 'activeLoans') renderPage();
-    }
-
-    function renderHistory() { 
-      if(!requests.length) return '<h3>Riwayat Peminjaman</h3><p>Kosong</p>'; 
-      let h='<h3>Riwayat Peminjaman</h3><table class="table"><thead><tr><th>Peminjam</th><th>Barang</th><th>Jumlah</th><th>Status</th><th>Tanggal Pinjam</th><th>Tanggal Kembali</th><th>Tanggal Pengembalian</th></tr></thead><tbody>'; 
-      requests.forEach(r=> {
-        const statusClass = r.status==='approved'?'text-success':r.status==='rejected'?'text-danger':r.status==='returned'?'text-info':'text-warning';
-        h+=`<tr>
-          <td>${escapeHtml(r.borrowerName)}</td>
-          <td>${escapeHtml(r.itemName)}</td>
-          <td>${r.quantity}</td>
-          <td class="${statusClass}">${escapeHtml(r.status)}</td>
-          <td>${escapeHtml(r.borrowDate||'-')}</td>
-          <td>${escapeHtml(r.returnDate||'-')}</td>
-          <td>${escapeHtml(r.actualReturnDate||'-')}</td>
-        </tr>`;
-      }); 
-      h+='</tbody></table>'; return h; 
-    }
-
-    // ==================== MANAGE USERS ====================
-    function renderManageUsers() { 
-      const u=getCurrentUser(); if(!u||u.role!=='admin') return '<div class="alert alert-danger">Akses ditolak</div>'; 
-      if(isUsersLoading) return '<div class="text-center"><div class="spinner-border"></div> Memuat data user...</div>'; 
-      let h=`<div class="d-flex justify-content-between mb-3"><h3><i class="fas fa-users"></i> Kelola User</h3><button class="btn btn-primary" onclick="showAddUserModal()"><i class="fas fa-plus"></i> Tambah User</button></div><table class="table table-bordered"><thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Aksi</th></tr></thead><tbody>`; 
-      users.forEach(usr=> {
-        let roleDisplay = ''; if(usr.role==='admin') roleDisplay='Admin'; else if(usr.role==='editor') roleDisplay='Editor'; else roleDisplay='Peminjam';
-        h+=`<tr><td>${escapeHtml(usr.name)} ${u.id===usr.id?'<span class="badge bg-info">Anda</span>':''}</td><td>${escapeHtml(usr.email)}</td><td>${roleDisplay}</td>
-        <td><button class="btn btn-sm btn-warning" onclick="editUser('${usr.id}')"><i class="fas fa-edit"></i></button> 
-        <button class="btn btn-sm btn-danger" onclick="deleteUser('${usr.id}')" ${u.id===usr.id?'disabled':''}><i class="fas fa-trash"></i></button></td></tr>`;
-      }); 
-      h+='</tbody></table>'; return h; 
-    }
-
-    function showAddUserModal() { openUserModal(null); }
-    function editUser(id) { openUserModal(getUserById(id)); }
-    function openUserModal(user) { 
-      const isEdit=!!user; document.getElementById('userModalTitle').innerText=isEdit?'Edit User':'Tambah User'; 
-      document.getElementById('editUserId').value=user?.id||''; document.getElementById('userName').value=user?.name||''; 
-      document.getElementById('userEmail').value=user?.email||''; document.getElementById('userPassword').value=''; 
-      document.getElementById('userPassword').placeholder=isEdit?'Kosongkan jika tidak mengubah':'Minimal 4 karakter'; 
-      document.getElementById('userRole').value=user?.role||'borrower'; 
-      if(userModalInstance) userModalInstance.dispose(); 
-      userModalInstance=new bootstrap.Modal(document.getElementById('userModal'),{backdrop:'static'}); userModalInstance.show(); 
-    }
-
-    async function saveUser() { 
-      const id=document.getElementById('editUserId').value, name=document.getElementById('userName').value.trim(), email=document.getElementById('userEmail').value.trim(), pass=document.getElementById('userPassword').value, role=document.getElementById('userRole').value; 
-      if(!name||!email){ showToast('Nama dan email harus diisi','warning'); return; } 
-      const exist=users.find(u=>u.email===email&&u.id!==id); if(exist){ showToast('Email sudah digunakan','error'); return; } 
-      if(!id){ if(!pass||pass.length<4){ showToast('Password minimal 4 karakter','warning'); return; } await addUser({name,email,password:pass,role}); showToast('User ditambahkan','success'); } 
-      else { const upd={name,email,role}; if(pass){ if(pass.length<4){ showToast('Password minimal 4 karakter','warning'); return; } upd.password=pass; } await updateUserById(id,upd); if(getCurrentUser().id===id) setCurrentUser({...getCurrentUser(),name,email,role}); showToast('User diupdate','success'); } 
-      userModalInstance.hide(); 
-    }
-
-    async function deleteUser(id) { if(!confirm('Hapus user?')) return; if(await deleteUserById(id)) showToast('User dihapus','success'); else showToast('Gagal hapus','error'); }
-
-    // ==================== DETAIL ====================
-    function showItemDetail(id) { const it=items.find(i=>i.id===id); if(it) displayItemDetailModal(it); else showToast('Tidak ditemukan','error'); }
-    function displayItemDetailModal(it) {
-      document.getElementById('itemDetailBody').innerHTML = `
-        <div class="text-center mb-3">${it.image ? `<img src="${it.image}" class="item-image">` : '<div class="alert alert-secondary">Tidak ada gambar</div>'}</div>
-        <h6 class="text-center text-primary fw-bold mb-3"><i class="fas fa-tag me-2"></i>Asset Sekolah Minggu GKPS Tangerang</h6>
-        <p><strong>Nama:</strong> ${escapeHtml(it.name)}</p><p><strong>Type:</strong> ${escapeHtml(it.type||'-')}</p><p><strong>Lama:</strong> ${escapeHtml(it.lama||'-')}</p><p><strong>Baru:</strong> ${escapeHtml(it.baru||'-')}</p><p><strong>Stok:</strong> ${it.quantity}</p><p><strong>Lokasi:</strong> ${escapeHtml(it.location||'-')}</p><p><strong>Status:</strong> ${escapeHtml(it.status||'Baik')}</p><p><strong>Catatan:</strong> ${escapeHtml(it.notes||'-')}</p>
-      `;
-      new bootstrap.Modal(document.getElementById('itemDetailModal')).show();
-    }
-
-    // ==================== INIT ====================
-    window.onload = async () => {
-      const params = new URLSearchParams(window.location.search), itemId = params.get('item');
-      startUsersListener();
-      if (itemId) {
-        try { const doc = await db.collection('items').doc(itemId).get(); if(doc.exists) displayItemDetailModal({id:doc.id,...doc.data()}); else document.getElementById('pageContent').innerHTML='<div class="alert alert-danger">Barang tidak ditemukan</div>'; } catch(e) { document.getElementById('pageContent').innerHTML='<div class="alert alert-danger">Error</div>'; }
-      } else {
-        const u = getCurrentUser();
-        if(u) { startItemsListener(); startRequestsListener(); navigate('inventory'); } else navigate('login');
-      }
-    };
-  </script>
+        function nextSlide(slideIndex) {
+            document.querySelectorAll('.slide').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.dot').forEach(el => el.classList.remove('active'));
+            document.getElementById('slide-' + slideIndex).classList.add('active');
+            document.getElementById('dot-' + slideIndex).classList.add('active');
+        }
+    </script>
 </body>
 </html>
